@@ -83,6 +83,11 @@
         <input type="text" id="node-input-topics">
     </div>
     <div class="form-row">
+        <label style="width:25%">All languages?</label>
+        <input type="checkbox" id="node-input-allLanguages" style="width:auto; vertical-align:top;">
+        <label for="node-input-allLanguages" style="width:auto;"> Returns tweets from all languages (no skip)</label>
+    </div>
+    <div class="form-row">
         <label for="node-input-topicLanguage" style="width:25%">Language</label>
         <input type="text" id="node-input-topicLanguage" placeholder="en,de">
     </div>
@@ -203,6 +208,7 @@
             onlyVerified: {value:false},
             topicRetweets: {value:false},
             loadMedia: {value:false},
+            allLanguages: {value:false},
             topicLanguage: {value:"en,de"},
             debug: {value:false},
             name: {value:"",required:false},

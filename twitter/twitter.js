@@ -17,14 +17,14 @@ module.exports = function(RED) {
         
         var id = n.connectionName;
         node.log('create new Twitter instance for: ' + id);
-        
+
         clients[id] = new Twit({
             consumer_key: node.credentials.consumerKey,
             consumer_secret: node.credentials.consumerSecret,
             access_token: node.credentials.accessToken,
             access_token_secret: node.credentials.accessSecret
         });
-        
+
         node.client = clients[id];
 
         this.on("close", function() {
@@ -57,6 +57,7 @@ module.exports = function(RED) {
         node.tweetLimit = parseInt(n.tweetLimit) || 0;
         node.onlyVerified = n.onlyVerified || false;
         node.topicRetweets = n.topicRetweets || false;
+        node.allLanguages = n.allLanguages || false;
         node.topicLanguage = n.topicLanguage.toString().trim().split(",") || ['en','de'];
         node.loadMedia = n.loadMedia || false;
         node.debug = n.debug || false;
@@ -149,7 +150,7 @@ module.exports = function(RED) {
 		                        }
 		                        
 		                        // if non requested language, drop tweet
-		                        if (node.topicLanguage.indexOf(tweet.lang) < 0) {
+		                        if (!node.allLanguages && node.topicLanguage.indexOf(tweet.lang) < 0) {
 		                            node.log('skip: language https://twitter.com/statuses/' + tweet.id_str);
 		                            return;
 		                        }
@@ -251,7 +252,7 @@ const asyncLoadAndSend = (getMedia, tweet, cb) => {
                 http.get(tweet.extended_tweet.entities.media[i].download_url, options, (res) => {
                     let data = [];
                     res.on('data', (chunk) => data.push(chunk));
-                    res.on('end', () => { 
+                    res.on('end', () => {
                         run++;
                         tweet.extended_tweet.entities.media[i].buffer = Buffer.concat(data);
                         if (run == tweet.extended_tweet.entities.media.length) {
