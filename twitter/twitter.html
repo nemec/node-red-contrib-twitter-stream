@@ -225,3 +225,81 @@
         }
     });
 </script>
+
+
+<!-- Twitter List streaming API --> 
+
+<script type="text/x-red" data-template-name="Twitter List Stream">
+    <div class="form-row">
+        <label for="node-input-name" style="width:25%"><i class="icon-bookmark"></i> Node name</label>
+        <input type="text" id="node-input-name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-connection" style="width:25%"><i class="fa fa-server"></i> Connection</label>
+        <input type="text" id="node-input-connection">
+    </div>
+    <div class="form-row">
+        <label for="node-input-listId" style="width:25%"><i class="fa fa-bookmark"></i> Twitter List</label>
+        <input type="text" id="node-input-listId">
+    </div>
+    <div class="form-row">
+        <label style="width:25%">Trigger at Start?</label>
+        <input type="checkbox" id="node-input-triggerOnStartup" style="width:auto; vertical-align:top;">
+        <label for="node-input-triggerOnStartup" style="width:auto;"> existing tweets sent on first load</label>
+    </div>
+    <div class="form-row">
+        <label style="width:25%">Retweets?</label>
+        <input type="checkbox" id="node-input-includeRetweets" style="width:auto; vertical-align:top;">
+        <label for="node-input-includeRetweets" style="width:auto;"> Include retweets</label>
+    </div>
+    <div class="form-row">
+        <label style="width:25%">Media?</label>
+        <input type="checkbox" id="node-input-loadMedia" style="width:auto; vertical-align:top;">
+        <label for="node-input-loadMedia" style="width:auto;"> Load and include media in tweets</label>
+    </div>
+    <div class="form-row">
+        <label style="width:25%">Debug?</label>
+        <input type="checkbox" id="node-input-debug" style="width:auto; vertical-align:top;">
+        <label for="node-input-debug" style="width:auto;"> Enable debug logging</label>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Twitter List Stream">
+    <p><b>Get tweets via the Twitter streaming API</b></p>
+    <p>Receive Tweets from specific users and/or for specific topics</p>
+    <p>The following is required before you can continue
+    <li>Twitter development account</br><a href="https://dev.twitter.com">dev.twitter.com</a></li>
+    <li>Twitter application </br><a href="https://apps.twitter.com">apps.twitter.com</a></li>
+    </p>
+    <p>Requirements for this node
+    <li>Twitter application Consumer/Access credentials</li>
+    </p>
+    <p>If 'Trigger on Startup' is selected, some existing tweets found in the
+        list will be sent to the flow immediately upon first deployment.
+    </p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('Twitter List Stream',{
+        category: 'input',
+        defaults: {
+            name: {value:"",required:false},
+            connection: {value:"",type:"twitter-api-connection"},
+            listId: {value:""},
+            triggerOnStartup: {value:false},
+            includeRetweets: {value:false},
+            loadMedia: {value:false},
+            debug: {value:false},
+        },
+        color: "#4099fe",
+        inputs:0,
+        outputs:1,
+        icon: "twitter.png",
+        label: function() {
+            return this.name||"Twitter List Stream";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>

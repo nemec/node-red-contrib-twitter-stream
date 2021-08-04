@@ -42,6 +42,94 @@ module.exports = function(RED) {
         }
     });
 
+    function TwitterListStream(n) {
+        RED.nodes.createNode(this,n);
+        var node = this;
+        node.listId = n.listId || "";
+        node.triggerOnStartup = n.triggerOnStartup || false;
+        node.tweetLimit = parseInt(n.tweetLimit) || 0;
+        node.includeRetweets = n.includeRetweets || false;
+        node.loadMedia = n.loadMedia || false;
+        node.debug = n.debug || false;
+        node.streamOptions = {};
+        node.tweetCount = 0;
+        node.connection = RED.nodes.getNode(n.connection);
+        node.status({fill:"yellow",shape:"dot",text:"connecting"});
+
+        var nodeContext = this.context();
+
+        let maxId = nodeContext.get('twitter_list_stream_max_id') || 0;
+        let startup = true;
+
+        if (maxId !== 0) {
+            node.log('Starting from context-stored tweet ID ' + maxId);
+        }
+
+        if (node.connection !== null)
+        {
+            node.streamOptions.list_id = node.listId;
+            if (node.includeRetweets === true) {
+                node.streamOptions.include_rts = true;
+            }
+
+            node.status({fill:"green",shape:"dot",text:"connected"});
+
+            var getListTweets = function() {
+                node.log('fetching tweets');
+                if (maxId !== 0) {
+                    node.streamOptions.since_id = maxId;
+                }
+
+                // https://developer.twitter.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-statuses
+                // https://github.com/ttezel/twit
+                node.connection.client.get('lists/statuses', node.streamOptions, function (err, data, response){
+                    if (err !== undefined) {
+	                    node.status({fill:"yellow",shape:"dot",text:"error fetching tweets"});
+	                    node.error(util.inspect(err, { showHidden: true, depth: null }));
+                    }
+                    else {
+                        node.status({fill:"green",shape:"dot",text:"connected"});
+                        let length = data.length;
+                        if (length === 1 && data[0].id === maxId) {
+                            node.log('Found 0 new tweets.');
+                            return;
+                        }
+                        node.log('Found ' + length + ' new tweets.');
+                        for (const tweet of data) {
+                            if (tweet.id > maxId) {
+                                maxId = tweet.id;  // TODO store persistent
+                                nodeContext.set('twitter_list_stream_max_id', tweet.id);
+                            }
+                            (node.debug === true) ? node.log(util.inspect(tweet, { showHidden: true, depth: null })) : node.log(tweet.user.name + ': ' + tweet.text);
+                            if (startup === false || node.triggerOnStartup === true ) {  // don't print if startup unless asked
+                                asyncLoadAndSend(node.loadMedia, tweet, (tweet) => { node.send({payload: tweet}); });
+                            }
+                        }
+                        if (startup === true) {
+                            startup = false;
+                        }
+                    }
+                    var sleep = (60000 - ((Math.floor(Math.random() * 10) + 1) * 1000))
+                    node.log('sleeping for ' + sleep + 'ms');
+                    setTimeout(getListTweets, sleep);
+                });
+            };
+            getListTweets();
+		}
+		else {
+			node.status({fill:"red",shape:"dot",text:"api connection not set"});
+		}
+
+        this.on("close", function() {
+            if (node.stream) {
+                node.log('stopping stream on close');
+                node.stream.stop();
+                node.streamOptions = null;
+                delete node.stream;
+            }
+        });
+    }
+
     //Twitter stream
     function TwitterStream(n) {
         RED.nodes.createNode(this,n);
@@ -222,7 +310,9 @@ module.exports = function(RED) {
             }
         });
     }
+
     RED.nodes.registerType("Twitter Stream",TwitterStream);
+    RED.nodes.registerType("Twitter List Stream",TwitterListStream);
 };
 
 const asyncLoadAndSend = (getMedia, tweet, cb) => {

@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mailsvb/node-red-contrib-twitter-stream.git"
+    "url": "git+https://github.com/nemec/node-red-contrib-twitter-stream.git"
   },
   "keywords": [
     "node-red",
@@ -34,11 +34,15 @@
     {
       "name": "Oliver Dawkins",
       "url": "https://github.com/virtualarchitectures"
+    },
+    {
+      "name": "Nemec",
+      "url": "https://github.com/nemec"
     }
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mailsvb/node-red-contrib-twitter-stream.git/issues"
+    "url": "https://github.com/nemec/node-red-contrib-twitter-stream.git/issues"
   },
-  "homepage": "https://github.com/mailsvb/node-red-contrib-twitter-stream#readme"
+  "homepage": "https://github.com/nemec/node-red-contrib-twitter-stream#readme"
 }
